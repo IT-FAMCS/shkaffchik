@@ -4,13 +4,13 @@ import telebot
 
 class SQLconnect():
     def __init__(self):
-        self.connect = sqlite3.connect('db.sqlite', check_same_thread=False)
+        self.connect = sqlite3.connect('db/db.sqlite', check_same_thread=False)
         self.cursor = self.connect.cursor()
         self.cursor.execute('CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, quantity INTEGER)')
         self.cursor.execute('CREATE TABLE IF NOT EXISTS taken (id TEXT)')
         
     def AddUser(self, id):
-        if self.cursor.execute("SELECT id FROM taken WHERE id =?", (id,)).fetchone() != []:
+        if self.cursor.execute("SELECT id FROM taken WHERE id = ?", (id,)).fetchone() is not None:            
             pass           
         else:
             self.cursor.execute("INSERT INTO taken (id) VALUES (?)", (id,))

@@ -53,55 +53,67 @@ def Ans(message):
 
 def NameOrTagListBot(message):
     Name = message.text
-    try:
-        if "@" in Name:
-            bot.send_message(message.chat.id, sql.ListOfTakenByTag(Name[1::1]))
-        elif Name == "Все":
-            bot.send_message(message.chat.id, sql.ListOfTaken())
-        else:
-            bot.send_message(message.chat.id, sql.ListOfTakenByName(Name))
-    except Exception as e:
-        bot.send_message(message, text="Такого тега или предмета не найдено")
+    if Name == "Назад":
+        bot.send_message(message.chat.id, "Ок", reply_markup=markup)
+        bot.register_next_step_handler(message, Ans)
+    else:
+        try:
+            if "@" in Name:
+                bot.send_message(message.chat.id, sql.ListOfTakenByTag(Name[1::1]), reply_markup=markup)
+            elif Name == "Все":
+                bot.send_message(message.chat.id, sql.ListOfTaken(), reply_markup=markup)
+            else:
+                bot.send_message(message.chat.id, sql.ListOfTakenByName(Name), reply_markup=markup)
+        except Exception as e:  
+            bot.send_message(message.chat.id, "Такого тега или предмета не найдено", reply_markup=markup)
 
 #Создание предмета в шкафу
 def NameOfItem(message):
+    print('name ok')
     Name = message.text
     if " " in Name:
-        bot.send_message(message.chat_id, "Присутствуют пробелы")
+            bot.send_message(message.chat.id, "Присутствуют пробелы")
     else:
         if Name == 'Назад':
-            bot.send_message(message.chat_id, 'ок', reply_markup=markup)
-            bot.register_next_step_handler(message, Ans)
-        if len(Name) >=15 :
-            bot.send_message(message.chat.id, "Длинновато")
+                bot.send_message(message.chat.id, 'ок', reply_markup=markup)
+                bot.register_next_step_handler(message, Ans)
         else:
-            bot.send_message(message.chat.id, "Введите описание (опционально)")
-            bot.register_next_step_handler(message,partial(discr, Name))
+            if len(Name) >=15 :
+                bot.send_message(message.chat.id, "Длинновато")
+            else:
+                bot.send_message(message.chat.id, "Введите описание (опционально)")
+                bot.register_next_step_handler(message,partial(discr, Name))
 def discr(Name, message):
+    print('discr ok')
     Discription = message.text
     if Discription == 'Назад':
         bot.send_message(reply_markup=markup)
         bot.register_next_step_handler(message, Ans)
-    Discription = textwrap.fill(Discription, 20)
-    if len(Discription) >=200:
-        bot.send_message(message.chat.id, "Длинновато")
     else:
-        bot.send_message(message.chat.id, "Введите кол-во предмета")
-        bot.register_next_step_handler(message, partial(FinalCreate, Name, Discription))
+        Discription = textwrap.fill(Discription, 20)
+        if len(Discription) >=200:
+            bot.send_message(message.chat.id, "Длинновато")
+        else:
+            bot.send_message(message.chat.id, "Введите кол-во предмета")
+            bot.register_next_step_handler(message, partial(FinalCreate, Name, Discription))
 def FinalCreate(Name, Discription,  message):
     try:
         Quantity = int(message.text)
+        if Quantity < 0:
+            bot.send_message(message.chat.id, "Неверное значение")
+        else:
+            bot.send_message(message.chat.id, sql.CreateItem(Name, Discription, Quantity))
     except ValueError:
         if message.text == 'Назад':
-            bot.send_message(message.chat_id,'ок', reply_markup=markup) 
+            bot.send_message(message.chat.id,'ок', reply_markup=markup) 
             bot.register_next_step_handler(message, Ans)
-        Quantity = 0
-        bot.send_message(message.chat.id, "Неправильное значение\nКол-во будет 0")
-    if Quantity < 0:
-        bot.send_message(message.chat.id, "Неверное значение")
-    else:
-        bot.send_message(message.chat.id, sql.CreateItem(Name, Discription, Quantity))
+        else:
+            Quantity = 0
+            bot.send_message(message.chat.id, "Неправильное значение\nКол-во будет 0")
+    
 
+        
+       
 
 
 #Взятие предмета из шкафа
@@ -128,16 +140,17 @@ def TakeItemBot(Name, message):
 def ReturnItemNameBot(message):
     Name = message.text
     if message.text == 'Назад':
-            bot.send_message(message.chat_id,'ок', reply_markup=markup)      
+            bot.send_message(message.chat.id,'ок', reply_markup=markup)      
             bot.register_next_step_handler(message, Ans)
-    bot.send_message(message.chat.id, "Введите кол-во предмета, которое хотите вернуть")
-    bot.register_next_step_handler(message, partial(ReturnItemBot, Name))
+    else:
+        bot.send_message(message.chat.id, "Введите кол-во предмета, которое хотите вернуть")
+        bot.register_next_step_handler(message, partial(ReturnItemBot, Name))
 def ReturnItemBot(Name, message):
     try:
         Quantity = int(message.text)
     except ValueError:
         if message.text == 'Назад':
-            bot.send_message(message.chat_id,'ок', reply_markup=markup)    
+            bot.send_message(message.chat.id,'ок', reply_markup=markup)    
             bot.register_next_step_handler(message, Ans)
         Quantity = 0
         bot.send_message(message.chat.id, "Неправильное значение\nКол-во будет 0")
@@ -151,14 +164,14 @@ def ReturnItemBot(Name, message):
 #
 def NameOfEditBot(message):
     if message.text == 'Назад':
-            bot.send_message(message.chat_id,'ок', reply_markup=markup)
+            bot.send_message(message.chat.id,'ок', reply_markup=markup)
             bot.register_next_step_handler(message, Ans)
     Name = message.text
     bot.send_message(message.chat.id, "Введите новое кол-во")
     bot.register_next_step_handler(message, partial(EditBot, Name))
 def EditBot(Name, message):
     if message.text == 'Назад':
-            bot.send_message(message.chat_id,'ок', reply_markup=markup)       
+            bot.send_message(message.chat.id,'ок', reply_markup=markup)       
             bot.register_next_step_handler(message, Ans)
     Quantity = int(message.text)
     if Quantity < 0:
@@ -170,7 +183,7 @@ def EditBot(Name, message):
 #
 def DeleteItemBot(message):
     if message.text == 'Назад':
-            bot.send_message(message.chat_id,'ок', reply_markup=markup)      
+            bot.send_message(message.chat.id,'ок', reply_markup=markup)      
             bot.register_next_step_handler(message, Ans)
     Name = message.text
     bot.send_message(message.chat.id, sql.DeleteItem(Name))
