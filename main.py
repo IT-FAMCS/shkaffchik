@@ -6,7 +6,7 @@ import textwrap
 
 sql = SQLconnect()
 
-bot = telebot.TeleBot('6914373217:AAE3Ed21LFpqo1ykAcpOup2vmFcOIrnnWug', parse_mode='HTML')
+bot = telebot.TeleBot('6629791393:AAF9w6GZZmIBK9h7zcfOGmiII65QJkXvLFc', parse_mode='HTML')
 retur = telebot.types.ReplyKeyboardMarkup()
 retur.add(telebot.types.KeyboardButton('Назад'))
 
@@ -72,14 +72,14 @@ def NameOfItem(message):
     print('name ok')
     Name = message.text
     if " " in Name:
-            bot.send_message(message.chat.id, "Присутствуют пробелы")
+            bot.send_message(message.chat.id, "Присутствуют пробелы", reply_markup=markup)
     else:
         if Name == 'Назад':
                 bot.send_message(message.chat.id, 'ок', reply_markup=markup)
                 bot.register_next_step_handler(message, Ans)
         else:
             if len(Name) >=15 :
-                bot.send_message(message.chat.id, "Длинновато")
+                bot.send_message(message.chat.id, "Длинновато", reply_markup=markup)
             else:
                 bot.send_message(message.chat.id, "Введите описание (опционально)")
                 bot.register_next_step_handler(message,partial(discr, Name))
@@ -92,7 +92,7 @@ def discr(Name, message):
     else:
         Discription = textwrap.fill(Discription, 20)
         if len(Discription) >=200:
-            bot.send_message(message.chat.id, "Длинновато")
+            bot.send_message(message.chat.id, "Длинновато", reply_markup=markup)
         else:
             bot.send_message(message.chat.id, "Введите кол-во предмета")
             bot.register_next_step_handler(message, partial(FinalCreate, Name, Discription))
@@ -100,16 +100,16 @@ def FinalCreate(Name, Discription,  message):
     try:
         Quantity = int(message.text)
         if Quantity < 0:
-            bot.send_message(message.chat.id, "Неверное значение")
+            bot.send_message(message.chat.id, "Неверное значение", reply_markup=markup)
         else:
-            bot.send_message(message.chat.id, sql.CreateItem(Name, Discription, Quantity))
+            bot.send_message(message.chat.id, sql.CreateItem(Name, Discription, Quantity), reply_markup=markup)
     except ValueError:
         if message.text == 'Назад':
             bot.send_message(message.chat.id,'ок', reply_markup=markup) 
             bot.register_next_step_handler(message, Ans)
         else:
             Quantity = 0
-            bot.send_message(message.chat.id, "Неправильное значение\nКол-во будет 0")
+            bot.send_message(message.chat.id, "Неправильное значение\nКол-во будет 0", reply_markup=markup)
     
 
         
@@ -153,12 +153,12 @@ def ReturnItemBot(Name, message):
             bot.send_message(message.chat.id,'ок', reply_markup=markup)    
             bot.register_next_step_handler(message, Ans)
         Quantity = 0
-        bot.send_message(message.chat.id, "Неправильное значение\nКол-во будет 0")
+        bot.send_message(message.chat.id, "Неправильное значение\nКол-во будет 0", reply_markup=markup)
     if Quantity < 0:
-        bot.send_message(message.chat.id, "Неверное значение")
+        bot.send_message(message.chat.id, "Неверное значение", reply_markup=markup)
     else:
         sql.ReturnItems(Name, Quantity, message.from_user.username)
-        bot.send_message(message.chat.id, "Успешно")
+        bot.send_message(message.chat.id, "Успешно", reply_markup=markup)
 
 
 #
@@ -175,10 +175,10 @@ def EditBot(Name, message):
             bot.register_next_step_handler(message, Ans)
     Quantity = int(message.text)
     if Quantity < 0:
-        bot.send_message(message.chat.id, "Неверное значение")
+        bot.send_message(message.chat.id, "Неверное значение", reply_markup=markup)
     else:
         sql.EditQuantity(Name, Quantity)
-        bot.send_message(message.chat.id, "Успешно")
+        bot.send_message(message.chat.id, "Успешно", reply_markup=markup)
 
 #
 def DeleteItemBot(message):
@@ -186,5 +186,5 @@ def DeleteItemBot(message):
             bot.send_message(message.chat.id,'ок', reply_markup=markup)      
             bot.register_next_step_handler(message, Ans)
     Name = message.text
-    bot.send_message(message.chat.id, sql.DeleteItem(Name))
+    bot.send_message(message.chat.id, sql.DeleteItem(Name), reply_markup=markup)
 bot.infinity_polling()
