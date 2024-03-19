@@ -120,7 +120,7 @@ class SQLconnect():
     def ReturnItemDetail(self, id):
         answer = ""
         for i in self.cursor.execute("SELECT name FROM items").fetchall():
-            answer += f"{i[0]} - {str(self.cursor.execute(f"SELECT {i[0]} FROM taken WHERE id = ?", (id,)).fetchall())[2:-3:1]}\n"
+            answer += f'{i[0]} - {str(self.cursor.execute(f"SELECT {i[0]} FROM taken WHERE id = ?", (id,)).fetchall())[2:-3:1]}\n'
         return answer
 
     def ReturnItems(self, name, quantity, id):
