@@ -5,7 +5,6 @@ import textwrap
 
 
 sql = SQLconnect()
-
 bot = telebot.TeleBot('6629791393:AAF9w6GZZmIBK9h7zcfOGmiII65QJkXvLFc', parse_mode='HTML')
 retur = telebot.types.ReplyKeyboardMarkup()
 retur.add(telebot.types.KeyboardButton('Назад'))
@@ -18,7 +17,8 @@ item4 = telebot.types.KeyboardButton('Создать предмет')
 item5 = telebot.types.KeyboardButton('Взятые')
 item6 = telebot.types.KeyboardButton('Изменить кол-во предмета')
 item7 = telebot.types.KeyboardButton('Удалить предмет')
-markup.add(item1, item2, item3, item4, item5, item6, item7)
+item8 = telebot.types.KeyboardButton('Изменить описание')
+markup.add(item1, item2, item3, item4, item5, item6, item7, item8)
 
 @bot.message_handler(commands=['start'])
 def answer(message):
@@ -48,6 +48,9 @@ def Ans(message):
     if message.text == "Удалить предмет":
         bot.send_message(message.chat.id, "Введите название предмета", reply_markup=retur)
         bot.register_next_step_handler(message, DeleteItemBot)
+    if message.text == "Изменить описание":
+        bot.send_message(message.chat.id, "Введите название предмета", reply_markup=retur)
+        bot.register_next_step_handler(message, ChangeDescription)
 
 
 
@@ -161,7 +164,7 @@ def ReturnItemBot(Name, message):
         bot.send_message(message.chat.id, "Успешно", reply_markup=markup)
 
 
-#
+#Изменение кол-ва предмета в шкафу
 def NameOfEditBot(message):
     if message.text == 'Назад':
             bot.send_message(message.chat.id,'ок', reply_markup=markup)
@@ -180,11 +183,28 @@ def EditBot(Name, message):
         sql.EditQuantity(Name, Quantity)
         bot.send_message(message.chat.id, "Успешно", reply_markup=markup)
 
-#
+#Удаление предмета из шкафа
 def DeleteItemBot(message):
     if message.text == 'Назад':
             bot.send_message(message.chat.id,'ок', reply_markup=markup)      
             bot.register_next_step_handler(message, Ans)
     Name = message.text
     bot.send_message(message.chat.id, sql.DeleteItem(Name), reply_markup=markup)
+
+#Изменение описания предмета
+def ChangeDescription(message):
+    if message.text == 'Назад':
+        bot.send_message(message.chat.id,'ок', reply_markup=markup)      
+        bot.register_next_step_handler(message, Ans)
+    else:
+        Name = message.text
+        bot.send_message(message.chat.id, "Введите новое описание")
+        bot.register_next_step_handler(message, partial(handleNewDescription, Name))
+def handleNewDescription(Name, message):
+    NewDescription = message.text
+    sql.ChangeDescription(Name, NewDescription)
+    bot.send_message(message.chat.id, "Описание успешно изменено", reply_markup=markup)
+
+
+
 bot.infinity_polling()

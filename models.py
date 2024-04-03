@@ -136,5 +136,7 @@ class SQLconnect():
                 self.cursor.execute("UPDATE items SET quantity =? WHERE name =?", (data[0] + int(quantity), name.upper()))
                 self.connect.commit()
 
-        
-    
+    def ChangeDescription(self, name, description):
+        self.cursor.execute("UPDATE items SET description = ? WHERE name = ?", (description, name.upper()))
+        self.connect.commit()
+        return "Успешно"
