@@ -199,8 +199,8 @@ def ChangeDescription(message):
     else:
         Name = message.text
         bot.send_message(message.chat.id, "Введите новое описание")
-        bot.register_next_step_handler(message, partial(handleNewDescription, Name))
-def handleNewDescription(Name, message):
+        bot.register_next_step_handler(message, partial(FinalNewDescription, Name))
+def FinalNewDescription(Name, message):
     NewDescription = message.text
     sql.ChangeDescription(Name, NewDescription)
     bot.send_message(message.chat.id, "Описание успешно изменено", reply_markup=markup)
